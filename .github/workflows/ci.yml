@@ -1,0 +1,44 @@
+# 每次 push 到 main、每个 PR 都跑一遍仓库自检与插件自测。
+# 检查内容全部写在 scripts/ 下，本地与 CI 用同一份逻辑：
+#   - ci-check.mjs：清单字段、files 白名单、patch 结构、row id 与导出名一致、
+#                   locale 元数据、CHANGELOG 首节与版本号一致、模块可导入
+#   - self-test.mjs：配置校验、路由匹配、头值派生、waterfall 行为模拟（62 项）
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Node ${{ matrix.node }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        node: ['20', '22']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node ${{ matrix.node }}
+        uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Repository self-checks
+        run: node scripts/ci-check.mjs
+
+      - name: Plugin self-test
+        run: node scripts/self-test.mjs

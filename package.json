@@ -24,10 +24,12 @@
     "cordis.patch.yml",
     "locale",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE"
   ],
   "scripts": {
-    "test": "node scripts/self-test.mjs"
+    "test": "node scripts/self-test.mjs",
+    "check": "node scripts/ci-check.mjs"
   },
   "keywords": [
     "dsh",
