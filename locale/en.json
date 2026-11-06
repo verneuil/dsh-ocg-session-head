@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "OCG Session Header",
+    "description": "Injects the x-opencode-session header per conversation for OpenCode Go routes via the official request-headers seam."
+  }
+}

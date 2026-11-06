@@ -1,0 +1,18 @@
+# 插入本插件的 loader row。
+#
+# 注意：这个 id 与 index.js 的 `export const name` 保持一致，
+# 同时是 profile 里「按 id 覆盖 config」的锚点。
+#
+# profile 侧按 id 覆盖会**整体替换** config。未写的键由 index.js 的 DEFAULTS 兜底；
+# 写错的键/类型/枚举会在插件激活阶段直接报错（官方「配置错误要响亮」），不会静默回落。
+- insert:
+    - id: dsh-ocg-session-head
+      name: '@verneuil/dsh-ocg-session-head'
+      config:
+        providers:
+          - ocg
+        hostSuffixes:
+          - opencode.ai
+        header: x-opencode-session
+        mode: session-id
+        debug: false

@@ -1,0 +1,49 @@
+{
+  "name": "@verneuil/dsh-ocg-session-head",
+  "version": "0.1.0",
+  "description": "OpenCode Go 会话头：监听宿主 llm-pi-ai/request-headers 瀑布，按会话为 ocg 路由注入 x-opencode-session（不猴补丁 fetch、不修改宿主）。",
+  "main": "index.js",
+  "type": "module",
+  "license": "MIT",
+  "author": "verneuil",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/verneuil/dsh-ocg-session-head.git"
+  },
+  "homepage": "https://github.com/verneuil/dsh-ocg-session-head#readme",
+  "bugs": {
+    "url": "https://github.com/verneuil/dsh-ocg-session-head/issues"
+  },
+  "exports": {
+    ".": "./index.js",
+    "./locale/*.json": "./locale/*.json",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "cordis.patch.yml",
+    "locale",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node scripts/self-test.mjs"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "opencode-go",
+    "session-header"
+  ],
+  "meta": {
+    "title": "OCG 会话头",
+    "description": "为 OpenCode Go 路由按会话注入 x-opencode-session 请求头（官方 request-headers 席位实现）。"
+  },
+  "dsh": {
+    "manifestVersion": 1,
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}

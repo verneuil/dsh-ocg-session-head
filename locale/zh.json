@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "OCG 会话头",
+    "description": "为 OpenCode Go 路由按会话注入 x-opencode-session 请求头（官方 request-headers 席位实现）。"
+  }
+}

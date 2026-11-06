@@ -1,0 +1,25 @@
+# 依赖
+node_modules/
+.pnpm-store/
+
+# 打包产物
+*.tgz
+*.tar.gz
+_pkg/
+
+# 日志与临时文件
+*.log
+npm-debug.log*
+pnpm-debug.log*
+_tmp/
+_v/
+
+# 本地经验文档（只在本机使用，禁止提交/推送）
+LOCAL_DEV_NOTES/
+
+# 编辑器与系统
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
