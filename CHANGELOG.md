@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.1.2
+
+### 改进
+- 声明 `engines.dsh` 为 `>=0.2.2-alpha.3`：宿主按 `includePrerelease` 判定，该范围同时接受 0.2.2 正式线与各预发布版，低于 0.2.2 的宿主会被正确拒绝。
+- 新增仓库图标 `icon.svg`，并用于 README 头部。
+- README 改为双语：默认英文（`README.md`）与简体中文（`README.zh.md`），顶部提供徽章式语言切换，并补齐 CI、版本、npm、下载量、provenance、DSH 版本要求与 dsh-plugin.org 收录徽章。
+
+---
+### Improvements
+- Declared `engines.dsh` as `>=0.2.2-alpha.3`: the host evaluates compatibility with `includePrerelease`, so the range accepts the 0.2.2 stable line and every prerelease, while hosts below 0.2.2 are correctly rejected.
+- Added the repository icon `icon.svg` and used it in the README header.
+- README is now bilingual: English by default (`README.md`) and Simplified Chinese (`README.zh.md`), with badge-based language switches plus CI, version, npm, downloads, provenance, DSH-requirement and dsh-plugin.org listing badges.
+
 ## 0.1.1
 
 ### 改进
