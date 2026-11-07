@@ -2,6 +2,25 @@
 
 给 **OpenCode Go** 路由按会话注入 `x-opencode-session` 请求头。
 
+> ### ⚠️ 先读这段：不满足以下任一条，你不需要本插件
+>
+> **1）宿主必须是 DeepSeek Harness 0.2.2 或更高版本**
+>
+> 本插件只做一件事：在宿主官方预留的请求头席位（`llm-pi-ai/request-headers` 瀑布）里写一个头。
+> 该席位自 **0.2.2-alpha.3** 才引入、0.2.2-rc.1 起稳定，**更早的版本没有这个能力底座**。
+> 在低版本上装它不会报错，但**永远不会生效**——看起来像「装了没用」，其实是无处可挂。
+>
+> **2）只对「自定义供应商名称」的 OpenCode 接入才有意义**
+>
+> - 如果你是通过 DSH 的**官方添加路径**接入 OpenCode / OpenCode Go（走 pi-ai 内置的
+>   `opencode` / `opencode-go` 路由），新版 pi-ai 已经会**自动**带上会话请求头，
+>   **不需要本插件**，装了纯属多余。
+> - 只有当你是这样接入的——**确实在用 OpenCode 服务，但供应商名是自己起的**
+>   （手写 `baseURL` + `api: openai-completions`，例如把它叫 `ocg`）——
+>   才拿不到那层自动包装，需要本插件补上这个头。
+>
+> 一句话：**官方路径接入 → 不用装；自定义命名接入 → 装本插件。**
+
 这是 `dsh-opencode-session`（fetch 猴补丁版）的**替代实现**：不替换 `globalThis.fetch`、不使用
 `AsyncLocalStorage`，只在宿主官方预留的请求头席位里写一个头。
 
@@ -18,44 +37,54 @@ OpenCode Go 自 2026-09-05 起，推理请求必须携带稳定的 `x-opencode-s
 400 {"type":"MissingSessionID", ...}
 ```
 
-官方对**内置** `opencode` / `opencode-go` 路由已经在 pi-ai 里做了包装；但本机的 OCG 是
-**自定义路由 `ocg`**（自写 `baseURL` + `api: openai-completions`），拿不到那层包装，因此需要插件补上。
+官方对**内置** `opencode` / `opencode-go` 路由已经在 pi-ai 里做了包装；但**自定义命名**的路由
+（自己起个名字、手写 `baseURL` + `api: openai-completions`）拿不到那层包装，因此需要插件补上。
+
+> 不确定自己属于哪种情况？回到开篇《先读这段》第 2 条对号入座。
 
 ## 2. 版本要求（重要）
 
 | 项 | 要求 |
 |---|---|
-| DSH | **≥ 0.2.2-rc.1**（`llm-pi-ai/request-headers` 事件自 0.2.2-alpha.3 引入，rc.1 确认保留） |
+| DSH | **≥ 0.2.2**（`llm-pi-ai/request-headers` 席位自 0.2.2-alpha.3 引入，0.2.2 系列起可用） |
 | Node | 无额外要求（纯 ESM，零依赖） |
 
 在**低于该版本**的宿主上安装是安全的：插件能加载、会打一行 ready 日志，但事件永不触发 →
 行为等价于不装（OCG 仍会 400）。**可用这一特性做「先装后升级」的分步验证。**
 
-## 3. 安装（只走 tarball）
+## 3. 安装
+
+### 3.1 从 npm 安装（推荐）
+
+在 DSH 的插件管理里安装 `@verneuil/dsh-ocg-session-head`（或指定版本 `@verneuil/dsh-ocg-session-head@0.1.1`），
+或直接在 profile 的 `package.json` 里加：
+
+```json
+"@verneuil/dsh-ocg-session-head": "^0.1.1"
+```
+
+### 3.2 离线 / 本地 tarball
 
 > ⚠️ **绝不要把「包目录」当安装 target。** pnpm 对目录使用 `link:`（junction），模块解析会
 > 退化成 Node 原生解析，DSH 解析拦截层失效 → 条目 `failed to import`。
 > **只有 tarball 会被解包成 profile 内的实体目录。**
 
-正规方式二选一：
-
-**A. 插件管理页**：设置 → 插件 → 安装本地包 → 选择 `.tgz`。
-
-**B. profile 依赖**：在 `$DSH_HOME/profiles/desktop/package.json` 的 `dependencies` 加入
+在 profile 的 `dependencies` 里写成 `file:` 形式：
 
 ```json
-"@verneuil/dsh-ocg-session-head": "file:D:/.../_pkg/dsh-ocg-session-head-0.1.0-rc.20261105-XXXX.tgz"
+"@verneuil/dsh-ocg-session-head": "file:<你的绝对路径>/dsh-ocg-session-head-<版本>.tgz"
 ```
 
-再用 DSH 自带的 node/pnpm 安装（本机不需要系统 npm）：
+写入依赖后，用 DSH 自带的 node/pnpm 安装（本机不需要系统 npm）：
 
 ```powershell
-& 'D:\Others\DeepSeek-Harness\dsh-runtimes\dsh-primary-runtime\dependencies\node\bin\node.exe' `
-  'D:\Others\DeepSeek-Harness\dsh-runtimes\dsh-primary-runtime\dependencies\pnpm\bin\pnpm.mjs' `
-  install --dir 'D:\Others\DeepSeek-Harness\profiles\desktop'
+$node   = Join-Path $env:DSH_HOME 'dsh-runtimes\dsh-primary-runtime\dependencies\node\bin\node.exe'
+$pnpm   = Join-Path $env:DSH_HOME 'dsh-runtimes\dsh-primary-runtime\dependencies\pnpm\bin\pnpm.mjs'
+$target = Join-Path $env:DSH_HOME 'profiles\desktop'
+& $node $pnpm install --dir $target
 ```
 
-安装后**重启 DSH**（重启会杀掉宿主里的 AI 进程，需人工执行）。
+无论哪种方式，安装后都需要**重启 DSH**（重启会杀掉宿主里的 AI 进程，需人工执行）。
 
 ## 4. 配置
 
@@ -133,7 +162,7 @@ $pnpm = Join-Path $env:DSH_HOME 'dsh-runtimes\dsh-primary-runtime\dependencies\p
 & $node $pnpm pack
 ```
 
-本地测试包命名遵循工作区约定：`0.1.0-rc.<YYYYMMDD-HHmm>`（临时改版本 → 打包 → 立即还原）。
+本地测试包可命名 `<版本>-rc.<YYYYMMDD-HHmm>`（临时改版本 → 打包 → 立即还原）。
 
 ## 9. 已知限制
 

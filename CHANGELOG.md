@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.1
+
+### 改进
+- README 新增开篇《先读这段》：明确本插件仅适用于 DeepSeek Harness 0.2.2 及以上，且仅用于「自定义供应商名称」的 OpenCode 接入；官方路径接入无需本插件。
+- README 安装说明更新为 npm 优先，并修正已失效的 DSH_HOME 路径示例。
+
+---
+### Improvements
+- README now opens with a "Read this first" section: the plugin requires DeepSeek Harness 0.2.2 or newer, and is only needed for OpenCode connected under a custom provider name — the official path needs no plugin.
+- Install instructions now prefer npm, and the outdated DSH_HOME path samples are corrected.
+
 ## 0.1.0
 
 ### 新功能
