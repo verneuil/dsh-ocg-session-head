@@ -14,6 +14,8 @@
 [![provenance](https://img.shields.io/badge/provenance-GitHub%20Actions-blueviolet)](https://www.npmjs.com/package/@verneuil/dsh-ocg-session-head)
 [![DSH](https://img.shields.io/badge/DSH-%E2%89%A50.2.2-4b8bf5)](https://github.com/verneuil/dsh-ocg-session-head#2-版本要求重要)
 
+[![Listed on dsh-plugin.org](https://dsh-plugin.org/badges/listed.svg)](https://dsh-plugin.org/plugins/verneuil/dsh-ocg-session-head)
+
 [更新日志](CHANGELOG.md) · [反馈](https://github.com/verneuil/dsh-ocg-session-head/issues)
 
 </div>
