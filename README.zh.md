@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="icon.svg" width="96" height="96" alt="OCG 会话头 icon" />
+
 # OCG 会话头（@verneuil/dsh-ocg-session-head）
 
 **给 OpenCode Go 路由按会话注入 `x-opencode-session` 请求头**
@@ -190,9 +192,9 @@ $pnpm = Join-Path $env:DSH_HOME 'dsh-runtimes\dsh-primary-runtime\dependencies\p
   `@deepseek-ai/dsh-llm-deepseek`，它自己发 `x-deepseek-harness-session-id`，与本插件无关。
 - **不覆盖模型发现**（宿主契约明确该事件 `excludes model discovery`）。
 - 事件是**同步**的：监听器必须就地修改 `headers` 并立刻 `return next()`，不得保存该对象引用。
-- 未声明 `engines.dsh`。官方推荐声明兼容范围，但 SemVer 的预发布规则会让 `>=0.2.2` 拒绝
-  `0.2.2-rc.1`、让 `>=0.2.2-rc.1` 拒绝将来的 `0.2.3-rc.1`，对跟着 rc 升级的用户反而更危险；
-  因此这里选择不声明（等价于不做版本门禁），运行期依赖单一公开事件，兼容面本就很窄。
+- 已声明 `engines.dsh` 为 `>=0.2.2-alpha.3`。宿主按 `includePrerelease: true` 判定：直接写 `>=0.2.2`
+  会拒绝 `0.2.2-rc.1`，写 `>=0.2.2-rc.1` 又会拒绝将来的 `0.2.3-rc.1`；锚到引入该席位的那一版 alpha，
+  即可同时接受正式线与之后的每个 RC，同时正确拒绝 `0.2.2` 以下的宿主。
 
 ## License
 

@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="icon.svg" width="96" height="96" alt="OCG Session Head icon" />
+
 # OCG Session Head (@verneuil/dsh-ocg-session-head)
 
 **Injects a per-conversation `x-opencode-session` request header for OpenCode Go routes**
@@ -205,10 +207,10 @@ revert immediately).
 - **Model discovery is not covered** (the host contract explicitly says the event `excludes model discovery`).
 - The event is **synchronous**: a listener must mutate `headers` in place and `return next()` immediately, and
   must not retain the object reference.
-- `engines.dsh` is deliberately not declared. Declaring a compatible range is recommended, but SemVer
-  prerelease rules would make `>=0.2.2` reject `0.2.2-rc.1` and `>=0.2.2-rc.1` reject a future `0.2.3-rc.1`
-  — worse for users who follow the RC line. So it is left undeclared (no version gate); the runtime depends
-  on a single public event, so the compatibility surface is already narrow.
+- `engines.dsh` is declared as `>=0.2.2-alpha.3`. The host evaluates compatibility with
+  `includePrerelease: true`, so a plain `>=0.2.2` would reject `0.2.2-rc.1`, and `>=0.2.2-rc.1` would reject a
+  future `0.2.3-rc.1`. Anchoring at the alpha that introduced the header seat accepts both the stable line and
+  every later RC, while anything below `0.2.2` is correctly rejected.
 
 ## License
 
