@@ -1,81 +1,106 @@
-# OCG 会话头（@verneuil/dsh-ocg-session-head）
+<div align="center">
 
-给 **OpenCode Go** 路由按会话注入 `x-opencode-session` 请求头。
+# OCG Session Head (@verneuil/dsh-ocg-session-head)
 
-> ### ⚠️ 先读这段：不满足以下任一条，你不需要本插件
->
-> **1）宿主必须是 DeepSeek Harness 0.2.2 或更高版本**
->
-> 本插件只做一件事：在宿主官方预留的请求头席位（`llm-pi-ai/request-headers` 瀑布）里写一个头。
-> 该席位自 **0.2.2-alpha.3** 才引入、0.2.2-rc.1 起稳定，**更早的版本没有这个能力底座**。
-> 在低版本上装它不会报错，但**永远不会生效**——看起来像「装了没用」，其实是无处可挂。
->
-> **2）只对「自定义供应商名称」的 OpenCode 接入才有意义**
->
-> - 如果你是通过 DSH 的**官方添加路径**接入 OpenCode / OpenCode Go（走 pi-ai 内置的
->   `opencode` / `opencode-go` 路由），新版 pi-ai 已经会**自动**带上会话请求头，
->   **不需要本插件**，装了纯属多余。
-> - 只有当你是这样接入的——**确实在用 OpenCode 服务，但供应商名是自己起的**
->   （手写 `baseURL` + `api: openai-completions`，例如把它叫 `ocg`）——
->   才拿不到那层自动包装，需要本插件补上这个头。
->
-> 一句话：**官方路径接入 → 不用装；自定义命名接入 → 装本插件。**
+**Injects a per-conversation `x-opencode-session` request header for OpenCode Go routes**
 
-这是 `dsh-opencode-session`（fetch 猴补丁版）的**替代实现**：不替换 `globalThis.fetch`、不使用
-`AsyncLocalStorage`，只在宿主官方预留的请求头席位里写一个头。
+[![English](https://img.shields.io/badge/lang-English-blue.svg)](README.md) [![简体中文](https://img.shields.io/badge/lang-%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87-red.svg)](README.zh.md)
 
-- 仓库：<https://github.com/verneuil/dsh-ocg-session-head>
-- 自测：`node scripts/self-test.mjs`（零依赖，不需要宿主）
+[![CI](https://github.com/verneuil/dsh-ocg-session-head/actions/workflows/ci.yml/badge.svg)](https://github.com/verneuil/dsh-ocg-session-head/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![version](https://img.shields.io/github/v/tag/verneuil/dsh-ocg-session-head?label=version&color=4b8bf5)](https://github.com/verneuil/dsh-ocg-session-head/releases/latest)
+[![npm](https://img.shields.io/npm/v/@verneuil/dsh-ocg-session-head?label=npm&color=cb3837)](https://www.npmjs.com/package/@verneuil/dsh-ocg-session-head)
+[![downloads](https://img.shields.io/npm/dm/@verneuil/dsh-ocg-session-head?label=downloads&color=cb3837)](https://www.npmjs.com/package/@verneuil/dsh-ocg-session-head)
+[![provenance](https://img.shields.io/badge/provenance-GitHub%20Actions-blueviolet)](https://www.npmjs.com/package/@verneuil/dsh-ocg-session-head)
+[![DSH](https://img.shields.io/badge/DSH-%E2%89%A50.2.2-4b8bf5)](https://github.com/verneuil/dsh-ocg-session-head#2-version-requirements-important)
+
+[Changelog](CHANGELOG.md) · [Issues](https://github.com/verneuil/dsh-ocg-session-head/issues)
+
+</div>
 
 ---
 
-## 1. 为什么需要
+> ### ⚠️ Read this first: if either condition below does not apply, you do not need this plugin
+>
+> **1) Your host must be DeepSeek Harness 0.2.2 or newer**
+>
+> The plugin does exactly one thing: it writes a header inside the header seat the host officially provides
+> (the `llm-pi-ai/request-headers` waterfall). That seat only appeared in **0.2.2-alpha.3** and became stable
+> in 0.2.2-rc.1 — **older versions simply do not have this foundation**. Installing it on an older host does
+> not error out, but it **never takes effect** — it looks like “installed but useless”, when in fact there is
+> nowhere for it to hook into.
+>
+> **2) It only matters for OpenCode connected under a custom provider name**
+>
+> - If you added OpenCode / OpenCode Go through DSH's **official path** (using pi-ai's built-in
+>   `opencode` / `opencode-go` routes), recent pi-ai already adds the session header **automatically** —
+>   **you do not need this plugin**, and installing it is pure redundancy.
+> - Only when you connect like this — **you really do use an OpenCode service, but the provider name is your
+>   own** (a hand-written `baseURL` plus `api: openai-completions`, say you call it `ocg`) — is that automatic
+>   wrapping out of reach, and this plugin is what supplies the header.
+>
+> In one sentence: **official path → no plugin needed; custom name → use this plugin.**
 
-OpenCode Go 自 2026-09-05 起，推理请求必须携带稳定的 `x-opencode-session`，否则返回：
+This is a **replacement** for `dsh-opencode-session` (the fetch monkey-patch): it does not replace
+`globalThis.fetch` and does not use `AsyncLocalStorage` — it only writes one header inside the seat the host
+reserves for exactly this purpose.
+
+- Repository: <https://github.com/verneuil/dsh-ocg-session-head>
+- Self-test: `node scripts/self-test.mjs` (zero dependencies, no host required)
+
+---
+
+## 1. Why it is needed
+
+Since 2026-09-05, OpenCode Go requires every inference request to carry a stable `x-opencode-session`,
+otherwise it returns:
 
 ```
 400 {"type":"MissingSessionID", ...}
 ```
 
-官方对**内置** `opencode` / `opencode-go` 路由已经在 pi-ai 里做了包装；但**自定义命名**的路由
-（自己起个名字、手写 `baseURL` + `api: openai-completions`）拿不到那层包装，因此需要插件补上。
+pi-ai already wraps the **built-in** `opencode` / `opencode-go` routes; but a **custom-named** route
+(your own name, hand-written `baseURL` + `api: openai-completions`) never gets that wrapping, so a plugin has
+to supply the header.
 
-> 不确定自己属于哪种情况？回到开篇《先读这段》第 2 条对号入座。
+> Not sure which case you are? See item 2 of “Read this first” above.
 
-## 2. 版本要求（重要）
+## 2. Version requirements (important)
 
-| 项 | 要求 |
+| Item | Requirement |
 |---|---|
-| DSH | **≥ 0.2.2**（`llm-pi-ai/request-headers` 席位自 0.2.2-alpha.3 引入，0.2.2 系列起可用） |
-| Node | 无额外要求（纯 ESM，零依赖） |
+| DSH | **≥ 0.2.2** (the `llm-pi-ai/request-headers` seat arrived in 0.2.2-alpha.3; available from the 0.2.2 line) |
+| Node | No extra requirement (pure ESM, zero dependencies) |
 
-在**低于该版本**的宿主上安装是安全的：插件能加载、会打一行 ready 日志，但事件永不触发 →
-行为等价于不装（OCG 仍会 400）。**可用这一特性做「先装后升级」的分步验证。**
+Installing on an **older** host is safe: the plugin loads and logs its ready line, but the event never
+fires → behaviour equals not installing it (OCG still returns 400). **This makes “install first, upgrade
+later” a valid step-by-step verification path.**
 
-## 3. 安装
+## 3. Installation
 
-### 3.1 从 npm 安装（推荐）
+### 3.1 From npm (recommended)
 
-在 DSH 的插件管理里安装 `@verneuil/dsh-ocg-session-head`（或指定版本 `@verneuil/dsh-ocg-session-head@0.1.1`），
-或直接在 profile 的 `package.json` 里加：
+Install `@verneuil/dsh-ocg-session-head` in DSH's plugin manager (or pin a version, e.g.
+`@verneuil/dsh-ocg-session-head@0.1.1`), or add it to the profile's `package.json` directly:
 
 ```json
 "@verneuil/dsh-ocg-session-head": "^0.1.1"
 ```
 
-### 3.2 离线 / 本地 tarball
+### 3.2 Offline / local tarball
 
-> ⚠️ **绝不要把「包目录」当安装 target。** pnpm 对目录使用 `link:`（junction），模块解析会
-> 退化成 Node 原生解析，DSH 解析拦截层失效 → 条目 `failed to import`。
-> **只有 tarball 会被解包成 profile 内的实体目录。**
+> ⚠️ **Never point the installer at a package directory.** pnpm turns directories into `link:` (junction)
+> entries, module resolution degrades to plain Node behaviour, DSH's resolution interceptor no longer applies
+> and the entry fails with `failed to import`. **Only a tarball is unpacked into a real directory inside the
+> profile.**
 
-在 profile 的 `dependencies` 里写成 `file:` 形式：
+Reference it as `file:` in the profile's `dependencies`:
 
 ```json
-"@verneuil/dsh-ocg-session-head": "file:<你的绝对路径>/dsh-ocg-session-head-<版本>.tgz"
+"@verneuil/dsh-ocg-session-head": "file:<your absolute path>/dsh-ocg-session-head-<version>.tgz"
 ```
 
-写入依赖后，用 DSH 自带的 node/pnpm 安装（本机不需要系统 npm）：
+Then install with DSH's bundled node/pnpm (no system npm required):
 
 ```powershell
 $node   = Join-Path $env:DSH_HOME 'dsh-runtimes\dsh-primary-runtime\dependencies\node\bin\node.exe'
@@ -84,11 +109,12 @@ $target = Join-Path $env:DSH_HOME 'profiles\desktop'
 & $node $pnpm install --dir $target
 ```
 
-无论哪种方式，安装后都需要**重启 DSH**（重启会杀掉宿主里的 AI 进程，需人工执行）。
+Either way, **restart DSH** afterwards (restarting kills the AI processes inside the host, so it must be done
+by hand).
 
-## 4. 配置
+## 4. Configuration
 
-`cordis.patch.yml` 自带一份默认 config；也可在 profile 的 `cordis.patch.yml` 里按 id 覆盖：
+`cordis.patch.yml` ships defaults; you can also override them by id in the profile's `cordis.patch.yml`:
 
 ```yaml
 - id: dsh-ocg-session-head
@@ -98,81 +124,89 @@ $target = Join-Path $env:DSH_HOME 'profiles\desktop'
     debug: true
 ```
 
-> 按 id 覆盖是**整体替换** config。
+> Overriding by id **replaces the whole config object**.
 
-| 键 | 默认 | 说明 |
+| Key | Default | Meaning |
 |---|---|---|
-| `providers` | `['ocg']` | 路由键白名单，精确匹配事件里的 `provider` |
-| `hostSuffixes` | `['opencode.ai']` | baseURL 主机后缀白名单；两条门是**或**关系，换路由键时兜底 |
-| `header` | `x-opencode-session` | 注入的头名，必须是合法 HTTP header 名 |
-| `mode` | `session-id` | `session-id`：直接用宿主会话 id（跨轮次/压缩/重启稳定）；`uuid`：按会话派生进程内稳定的不透明 uuid |
-| `debug` | `false` | 每次成功注入打一行日志 |
-| `maxTrackedSessions` | `4096` | `uuid` 模式下会话映射上限，超出按最旧淘汰 |
+| `providers` | `['ocg']` | Provider-key allowlist, matched exactly against `provider` in the event |
+| `hostSuffixes` | `['opencode.ai']` | baseURL host-suffix allowlist; the two gates are OR-ed, the host gate is the fallback when you rename the route |
+| `header` | `x-opencode-session` | Header name to inject; must be a valid HTTP header name |
+| `mode` | `session-id` | `session-id`: use the host conversation id (stable across turns, compaction and restarts); `uuid`: derive an opaque uuid that is stable within the process |
+| `debug` | `false` | Log one line per successful injection |
+| `maxTrackedSessions` | `4096` | Session map cap in `uuid` mode; the oldest entry is evicted first |
 
-### 配置校验（错误会响亮报错）
+### Config validation (errors are loud)
 
-遵循官方「配置错误要响亮」原则：**非法配置会让插件激活失败并给出字段名**，不会静默回落。
+Following the official “misconfiguration should be loud” principle, **an invalid config fails plugin
+activation and names the offending field** — it never falls back silently.
 
-| 情况 | 行为 |
+| Situation | Behaviour |
 |---|---|
-| 键未配置（`undefined`） | 使用默认值 |
-| 出现未知键名（疑似拼写错误） | ❌ 报错并列出合法键 |
-| `providers` / `hostSuffixes` 不是字符串数组、含空串、含重复项 | ❌ 报错并指出下标 |
-| `header` 为空或不是合法 HTTP header 名 | ❌ 报错 |
-| `header` 指向 Harness 归属头（`user-agent`、`x-deepseek-harness-*`） | ❌ 报错（宿主会在所有贡献者之后覆盖它，写了也无效） |
-| `mode` 不是 `session-id` / `uuid` | ❌ 报错 |
-| `debug` 不是布尔、`maxTrackedSessions` 不是正整数 | ❌ 报错 |
-| `providers` 与 `hostSuffixes` **同时为空** | ❌ 报错（永远匹配不到任何请求） |
+| Key not set (`undefined`) | Default is used |
+| Unknown key (likely a typo) | ❌ Error, valid keys listed |
+| `providers` / `hostSuffixes` not a string array, or containing empty/duplicate items | ❌ Error, offending index reported |
+| `header` empty or not a valid HTTP header name | ❌ Error |
+| `header` points at a Harness attribution header (`user-agent`, `x-deepseek-harness-*`) | ❌ Error (the host overwrites it after all contributors, so writing it would be useless) |
+| `mode` is neither `session-id` nor `uuid` | ❌ Error |
+| `debug` not a boolean, `maxTrackedSessions` not a positive integer | ❌ Error |
+| `providers` and `hostSuffixes` **both empty** | ❌ Error (nothing could ever match) |
 
-> 数组字段语义：「未配置」用默认值；**显式传空数组表示关闭这道门**。
-> 例如 `hostSuffixes: []` 表示只按路由键匹配、不再按 baseURL 主机兜底。
+> Array semantics: “not set” means the default; **passing an empty array explicitly disables that gate**.
+> For example `hostSuffixes: []` matches by provider key only, with no baseURL host fallback.
 
-## 5. 行为保证
+## 5. Behaviour guarantees
 
-- **已有同名头一律让路**：不覆盖静态 `headers` 配置、官方实现或其它插件写入的值。
-- **无会话 id 不注入**：辅助调用若没有 `sessionId`，原样放行。
-- **失败即放行**：插件内部任何异常只 `warn` 一行，然后继续 `next()`，绝不因本插件打断推理。
-- **零全局副作用**：不修改 `globalThis`、不替换 `fetch`、不写文件。
-- **随插件卸载自动撤销**：监听器由 `ctx.on()` 注册，归 fiber 生命周期管理。
+- **An existing header always wins**: static `headers` config, the official implementation and other plugins
+  are never overwritten.
+- **No session id, no injection**: auxiliary calls without a `sessionId` pass through untouched.
+- **Fail open**: any internal error only logs a warning line and then calls `next()`; this plugin never breaks
+  an inference call.
+- **No global side effects**: no `globalThis` mutation, no `fetch` replacement, no file writes.
+- **Disposed with the plugin**: the listener is registered via `ctx.on()` and follows the fiber lifecycle.
 
-## 6. 验证（四关）
+## 6. Verification (four checks)
 
-1. **启动日志**：宿主控制台出现
+1. **Ready line**: the host console shows
    `[dsh-ocg-session-head] ready (header=x-opencode-session mode=session-id providers=ocg ...)`
-2. **注入日志**：把 `debug` 打开后，每次模型调用出现
+2. **Injection line**: with `debug` enabled, every model call shows
    `[dsh-ocg-session-head] x-opencode-session=<id> provider=ocg model=... purpose=chat`
-3. **真请求 200**：正常对话不出现 400 `MissingSessionID`。
-4. **反向证明**：禁用本插件后立刻 400 —— 证明头确实是它在发。
+3. **Real request 200**: normal conversations never return 400 `MissingSessionID`.
+4. **Counter-proof**: disable the plugin and the 400 comes back immediately — proving the header was coming
+   from it.
 
-## 7. 卸载与回滚
+## 7. Uninstall and rollback
 
-- 插件管理页卸载，或从 profile `dependencies` 删除该包后重装依赖。
-- 旧插件 `dsh-opencode-session` 可与之**共存**（两者都「已有不覆盖」，新实现先写入、旧的自动 no-op）。
-  切换期建议：**旧插件保持安装但禁用**，出问题 30 秒切回。
+- Uninstall from the plugin manager, or remove the package from the profile's `dependencies` and reinstall.
+- The older plugin `dsh-opencode-session` **can coexist** (both let existing headers win: this implementation
+  writes first, the older one then no-ops). During migration, **keep the old plugin installed but disabled**,
+  so you can switch back in 30 seconds.
 
-## 8. 开发与打包
+## 8. Development and packaging
 
 ```powershell
-# 自测（零依赖，不需要宿主）
+# self-test (zero dependencies, no host required)
 node scripts/self-test.mjs
 
-# 用 DSH 自带运行时打包（无需系统 node/pnpm）
+# pack with DSH's bundled runtime (no system node/pnpm needed)
 $node = Join-Path $env:DSH_HOME 'dsh-runtimes\dsh-primary-runtime\dependencies\node\bin\node.exe'
 $pnpm = Join-Path $env:DSH_HOME 'dsh-runtimes\dsh-primary-runtime\dependencies\pnpm\bin\pnpm.mjs'
 & $node $pnpm pack
 ```
 
-本地测试包可命名 `<版本>-rc.<YYYYMMDD-HHmm>`（临时改版本 → 打包 → 立即还原）。
+Local test packages may be named `<version>-rc.<YYYYMMDD-HHmm>` (bump the version temporarily → pack →
+revert immediately).
 
-## 9. 已知限制
+## 9. Known limitations
 
-- 只覆盖 **pi-ai 路由**（`@deepseek-ai/dsh-llm-pi-ai`）。`deepseek-official` 走
-  `@deepseek-ai/dsh-llm-deepseek`，它自己发 `x-deepseek-harness-session-id`，与本插件无关。
-- **不覆盖模型发现**（宿主契约明确该事件 `excludes model discovery`）。
-- 事件是**同步**的：监听器必须就地修改 `headers` 并立刻 `return next()`，不得保存该对象引用。
-- 未声明 `engines.dsh`。官方推荐声明兼容范围，但 SemVer 的预发布规则会让 `>=0.2.2` 拒绝
-  `0.2.2-rc.1`、让 `>=0.2.2-rc.1` 拒绝将来的 `0.2.3-rc.1`，对跟着 rc 升级的用户反而更危险；
-  因此这里选择不声明（等价于不做版本门禁），运行期依赖单一公开事件，兼容面本就很窄。
+- Only **pi-ai routes** are covered (`@deepseek-ai/dsh-llm-pi-ai`). `deepseek-official` goes through
+  `@deepseek-ai/dsh-llm-deepseek`, which sends its own `x-deepseek-harness-session-id` and is unrelated.
+- **Model discovery is not covered** (the host contract explicitly says the event `excludes model discovery`).
+- The event is **synchronous**: a listener must mutate `headers` in place and `return next()` immediately, and
+  must not retain the object reference.
+- `engines.dsh` is deliberately not declared. Declaring a compatible range is recommended, but SemVer
+  prerelease rules would make `>=0.2.2` reject `0.2.2-rc.1` and `>=0.2.2-rc.1` reject a future `0.2.3-rc.1`
+  — worse for users who follow the RC line. So it is left undeclared (no version gate); the runtime depends
+  on a single public event, so the compatibility surface is already narrow.
 
 ## License
 
