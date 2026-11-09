@@ -1,6 +1,6 @@
 {
   "name": "@verneuil/dsh-ocg-session-head",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "OpenCode Go 会话头：监听宿主 llm-pi-ai/request-headers 瀑布，按会话为 ocg 路由注入 x-opencode-session（不猴补丁 fetch、不修改宿主）。",
   "main": "index.js",
   "type": "module",
@@ -44,6 +44,7 @@
     "title": "OCG 会话头",
     "description": "为 OpenCode Go 路由按会话注入 x-opencode-session 请求头（官方 request-headers 席位实现）。"
   },
+  "icon": "./icon.svg",
   "dsh": {
     "manifestVersion": 1,
     "bundle": {

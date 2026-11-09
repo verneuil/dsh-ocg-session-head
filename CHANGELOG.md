@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.3
+
+### 修复
+- 修复插件在 DeepSeek Harness 插件列表中显示默认图标、而非自带图标的问题：补声明 `package.json` 的 `icon` 字段。
+
+---
+### Fixes
+- Fixed the plugin showing the default placeholder instead of its own icon in the DeepSeek Harness plugin list, by declaring the `icon` field in `package.json`.
+
 ## 0.1.2
 
 ### 改进
