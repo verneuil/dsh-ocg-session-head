@@ -18,6 +18,7 @@
 
 [![Listed on dsh-plugin.org](https://dsh-plugin.org/badges/listed.svg)](https://dsh-plugin.org/plugins/verneuil/dsh-ocg-session-head)
 [![Awesome DSH Plugin](https://awesome-dsh-plugin.com/badge.svg)](https://awesome-dsh-plugin.com/p/verneuil/dsh-ocg-session-head)
+[![dsh.so install · dsh 0.2.2-rc.1](https://cdn.dsh.so/badge/install/dsh-ocg-session-head@0.2.2-rc.1.svg)](https://www.dsh.so/artifact/dsh-ocg-session-head/?ref=badge-install)
 
 [更新日志](CHANGELOG.md) · [反馈](https://github.com/verneuil/dsh-ocg-session-head/issues)
 
