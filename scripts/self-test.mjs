@@ -209,6 +209,41 @@ dispatch(uuidHost, { ...target, sessionId: 'session-abc' }, headers)
 const derived = headers.get('x-opencode-session')
 ok('uuid mode injects a derived value', derived !== null && derived !== 'session-abc', derived)
 
+/**
+ * 驱动一次「下游监听者抛错」的 waterfall：next() 与 cordis 一样带重复调用守卫。
+ * @param {object} box 假 ctx 观测盒。
+ * @param {unknown} request 路由元数据。
+ * @param {Headers} headers 请求头副本。
+ * @returns {{error: Error | undefined, calls: number}} 冒出的错误与 next 调用次数。
+ */
+function dispatchDownstreamFailure(box, request, headers) {
+  let calls = 0
+  const next = () => {
+    calls += 1
+    if (calls > 1) throw new Error('next() called multiple times')
+    throw new Error('downstream boom')
+  }
+  try {
+    box.handler(request, headers, next)
+    return { error: undefined, calls }
+  } catch (error) {
+    return { error, calls }
+  }
+}
+
+let boom = dispatchDownstreamFailure(
+  host,
+  { provider: 'deepseek-official', baseURL: 'https://api.deepseek.com/v1', sessionId: 's' },
+  new Headers(),
+)
+ok('a downstream error propagates untouched on a non-matching route', boom.error?.message === 'downstream boom', boom.error?.message)
+ok('next() is called exactly once when a downstream listener throws', boom.calls === 1, boom.calls)
+
+const injected = new Headers()
+boom = dispatchDownstreamFailure(host, { ...target, sessionId: 'session-abc' }, injected)
+ok('a downstream error propagates untouched on an injected route', boom.error?.message === 'downstream boom', boom.error?.message)
+ok('the header is written before the downstream failure surfaces', injected.get('x-opencode-session') === 'session-abc', injected.get('x-opencode-session'))
+
 // 配置错误必须让插件激活失败（而不是带着错配置继续跑）
 const badHost = makeHost()
 let activationError

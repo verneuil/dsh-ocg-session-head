@@ -243,24 +243,28 @@ export function apply(ctx, config) {
   const uuidBySession = new Map()
 
   ctx.on('llm-pi-ai/request-headers', (request, headers, next) => {
-    // 宿主契约要求监听者必须调用 next()；任何异常都不允许把整次推理打断，
-    // 因此在本地逻辑上失败即「放弃注入、原样放行」。
+    // 契约要求每个监听者**恰好调用一次** next()。
+    // try 只包住「自己的判断与写头」：这里出错就地放弃注入（fail-open），
+    // 但不能把下游监听者的异常一起吞掉——那会把别人的真实错误改写成 cordis 的
+    // "next() called multiple times"，排查时完全失真。
+    if (typeof next !== 'function') return headers
     try {
-      if (typeof next !== 'function') return headers
-      if (request === null || typeof request !== 'object') return next()
-      if (headers === null || typeof headers !== 'object' || typeof headers.set !== 'function') return next()
-      if (!isOpenCodeRoute(options, request)) return next()
-      // 已有同名头一律让路：与官方实现、其它插件、静态 headers 配置共存。
-      if (typeof headers.has === 'function' && headers.has(options.header)) return next()
-      const value = headerValueFor(options, uuidBySession, request.sessionId)
-      if (value === undefined) return next()
-      headers.set(options.header, value)
-      if (options.debug) {
-        ctx.logger.info(
-          `[dsh-ocg-session-head] ${options.header}=${value} `
-            + `provider=${String(request.provider)} model=${String(request.model)} `
-            + `purpose=${String(request.purpose ?? 'chat')}`,
-        )
+      if (request !== null && typeof request === 'object'
+        && headers !== null && typeof headers === 'object' && typeof headers.set === 'function'
+        && isOpenCodeRoute(options, request)
+        // 已有同名头一律让路：与官方实现、其它插件、静态 headers 配置共存。
+        && !(typeof headers.has === 'function' && headers.has(options.header))) {
+        const value = headerValueFor(options, uuidBySession, request.sessionId)
+        if (value !== undefined) {
+          headers.set(options.header, value)
+          if (options.debug) {
+            ctx.logger.info(
+              `[dsh-ocg-session-head] ${options.header}=${value} `
+                + `provider=${String(request.provider)} model=${String(request.model)} `
+                + `purpose=${String(request.purpose ?? 'chat')}`,
+            )
+          }
+        }
       }
     } catch (error) {
       ctx.logger.warn(

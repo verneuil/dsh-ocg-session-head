@@ -2,7 +2,7 @@
 # 检查内容全部写在 scripts/ 下，本地与 CI 用同一份逻辑：
 #   - ci-check.mjs：清单字段、files 白名单、patch 结构、row id 与导出名一致、
 #                   locale 元数据、CHANGELOG 首节与版本号一致、模块可导入
-#   - self-test.mjs：配置校验、路由匹配、头值派生、waterfall 行为模拟（62 项）
+#   - self-test.mjs：配置校验、路由匹配、头值派生、waterfall 行为模拟（66 项）
 name: CI
 
 on:

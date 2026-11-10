@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.4
+
+### 修复
+- 修复请求头监听器的异常边界：下游贡献者抛错时会被本插件二次调用 `next()`，把真实错误改写成 `next() called multiple times`。现在 `next()` 只在 `try` 外调用一次，下游错误原样上浮，自身错误仍 fail-open。
+
+---
+### Fixes
+- Fixed the listener's error boundary: when a downstream contributor threw, the plugin could call `next()` a second time and replace the real error with `next() called multiple times`. `next()` is now called exactly once outside `try`, downstream errors surface untouched, and the plugin's own failures still fail open.
+
 ## 0.1.3
 
 ### 修复
