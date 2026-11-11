@@ -2,11 +2,11 @@
 
 ## Supported versions
 
-Only the latest published version of `@verneuil/dsh-ocg-session-head` is supported.
+Only the latest published release of `@verneuil/dsh-ocg-session-head` is supported. The current latest is **`0.1.4`**; older releases receive no fixes, so upgrade first.
 
 | Version | Supported |
 |---|---|
-| `0.1.x` (latest) | ✅ |
+| latest release (currently `0.1.4`) | ✅ |
 | anything older | ❌ |
 
 ## Reporting a vulnerability
@@ -44,7 +44,7 @@ as possible, usually within a week; a fix and advisory follow once the report is
 
 ## 中文说明
 
-- **支持范围**：只支持最新发布的 `0.1.x` 版本。
+- **支持范围**：只支持最新发布版本（当前 `0.1.4`）；更早版本不再修复，请先升级。
 - **报告方式**：请勿公开提 issue。到仓库 **Security** 页 → **Report a vulnerability** 私下提交，
   附上插件版本、DSH 版本、现象、最小复现与影响评估。
 - **不在范围内**：DeepSeek Harness 本体、pi-ai 供应商层、OpenCode Go 服务的问题，请报给各自上游。
