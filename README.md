@@ -8,12 +8,8 @@
 
 [![English](https://img.shields.io/badge/lang-English-blue.svg)](README.md) [![简体中文](https://img.shields.io/badge/lang-%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87-red.svg)](README.zh.md)
 
-[![CI](https://github.com/verneuil/dsh-ocg-session-head/actions/workflows/ci.yml/badge.svg)](https://github.com/verneuil/dsh-ocg-session-head/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![version](https://img.shields.io/github/v/tag/verneuil/dsh-ocg-session-head?label=version&color=4b8bf5)](https://github.com/verneuil/dsh-ocg-session-head/releases/latest)
 [![npm](https://img.shields.io/npm/v/@verneuil/dsh-ocg-session-head?label=npm&color=cb3837)](https://www.npmjs.com/package/@verneuil/dsh-ocg-session-head)
-[![downloads](https://img.shields.io/npm/dt/@verneuil/dsh-ocg-session-head?label=downloads&color=cb3837)](https://www.npmjs.com/package/@verneuil/dsh-ocg-session-head)
-[![provenance](https://img.shields.io/badge/provenance-GitHub%20Actions-blueviolet)](https://www.npmjs.com/package/@verneuil/dsh-ocg-session-head)
 [![DSH](https://img.shields.io/badge/DSH-%E2%89%A50.2.2-4b8bf5)](https://github.com/verneuil/dsh-ocg-session-head#2-version-requirements-important)
 
 [![Listed on dsh-plugin.org](https://dsh-plugin.org/badges/listed.svg)](https://dsh-plugin.org/plugins/verneuil/dsh-ocg-session-head)
