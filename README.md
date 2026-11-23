@@ -13,8 +13,8 @@
 [![DSH](https://img.shields.io/badge/DSH-%E2%89%A50.2.2-4b8bf5)](https://github.com/verneuil/dsh-ocg-session-head#2-version-requirements-important)
 
 [![Listed on dsh-plugin.org](https://dsh-plugin.org/badges/listed.svg)](https://dsh-plugin.org/plugins/verneuil/dsh-ocg-session-head)
-[![Awesome DSH Plugin](https://awesome-dsh-plugin.com/badge.svg)](https://awesome-dsh-plugin.com/p/verneuil/dsh-ocg-session-head)
 [![dsh.so install · dsh 0.2.2-rc.3](https://cdn.dsh.so/badge/install/dsh-ocg-session-head@0.2.2-rc.3.svg)](https://www.dsh.so/artifact/dsh-ocg-session-head/?ref=badge-install)
+[![Awesome DSH Plugin](https://awesome-dsh-plugin.com/badge.svg)](https://awesome-dsh-plugin.com/p/verneuil/dsh-ocg-session-head)
 
 [Changelog](CHANGELOG.md) · [Issues](https://github.com/verneuil/dsh-ocg-session-head/issues) · [Security](SECURITY.md)
 
